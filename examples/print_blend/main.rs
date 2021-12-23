@@ -1,22 +1,14 @@
 use blend::Blend;
 use libflate::gzip::Decoder;
 use std::{
-    env,
     fs::File,
-    io::{self, BufWriter, Read, Write},
-    path::{self, PathBuf},
+    io::{self, Read},
+    path::Path,
+    process::exit,
 };
 
-fn print_blend(file_name: impl AsRef<str>) -> Result<(), io::Error> {
-    let file_name = file_name.as_ref();
-    let base_path = path::PathBuf::from(
-        env::var_os("CARGO_MANIFEST_DIR").expect("could not find cargo manifest dir"),
-    );
-
-    let blend_path = base_path.join(format!("examples/blend_files/{}", file_name));
-    let output_path = base_path.join(format!("examples/print_blend/output_{}.txt", file_name));
-
-    println!("{}", blend_path.display());
+fn print_blend(blend_path: impl AsRef<Path>) -> Result<(), io::Error> {
+    println!("{}", blend_path.as_ref().display());
     let mut file = File::open(blend_path)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
@@ -30,24 +22,30 @@ fn print_blend(file_name: impl AsRef<str>) -> Result<(), io::Error> {
     }
 
     let blend = Blend::new(&data[..]);
-    let mut output_path_without_file = PathBuf::from(&output_path);
-    output_path_without_file.pop();
-    std::fs::create_dir_all(&output_path_without_file)?;
-    let mut buffer = BufWriter::new(File::create(output_path)?);
 
     for o in blend.get_all_root_blocks() {
-        write!(buffer, "{}", o)?;
+        print!("{}", o);
     }
 
-    writeln!(buffer)?;
-    buffer.flush()?;
-
-    println!("done: {}", file_name);
+    println!("done");
 
     Ok(())
 }
 
 pub fn main() -> Result<(), io::Error> {
-    print_blend("2_80.blend")?;
+    let args: Vec<_> = std::env::args().collect();
+    if args.len() != 3 && args.len() != 2 {
+        panic!("incorrect number of arguments")
+    }
+    let blend_path = if args[1] == "--help" {
+        println!("usage:");
+        println!("{} --blend <blend file path>", args[0]);
+        exit(-1);
+    } else if args[1] == "--blend" {
+        &args[2]
+    } else {
+        panic!("unknown arguments passed, see --help for more details")
+    };
+    print_blend(blend_path)?;
     Ok(())
 }
