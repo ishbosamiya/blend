@@ -151,7 +151,8 @@ fn fmt_instance(
                 write!(f, "{}    {}: ", ident_str, field_name)?;
                 match &field.type_name[..] {
                     "int" => writeln!(f, "{} = {};", field.type_name, inst.get_i32(field_name))?,
-                    "char" => writeln!(f, "{} = {};", field.type_name, inst.get_u8(field_name))?,
+                    "char" => writeln!(f, "{} = {};", field.type_name, inst.get_i8(field_name))?,
+                    "uchar" => writeln!(f, "{} = {};", field.type_name, inst.get_u8(field_name))?,
                     "short" => writeln!(f, "{} = {};", field.type_name, inst.get_i16(field_name))?,
                     "float" => writeln!(f, "{} = {};", field.type_name, inst.get_f32(field_name))?,
                     "double" => writeln!(f, "{} = {};", field.type_name, inst.get_f64(field_name))?,
@@ -161,6 +162,7 @@ fn fmt_instance(
                     "uint64_t" => {
                         writeln!(f, "{} = {};", field.type_name, inst.get_u64(field_name))?
                     }
+                    "int8_t" => writeln!(f, "{} = {};", field.type_name, inst.get_i8(field_name))?,
                     _ if field.is_primitive => panic!("unknown primitive"),
                     _ => {
                         if field.type_name == "ListBase" {
@@ -582,11 +584,16 @@ impl<'a> Instance<'a> {
         let blender_type_name = U::blender_name();
 
         match field.info {
-            FieldInfo::Value if field.is_primitive && field.type_name == blender_type_name => {
+            FieldInfo::Value
+                if field.is_primitive
+                    && blender_type_name
+                        .iter()
+                        .any(|blender_type_name| *blender_type_name == field.type_name) =>
+            {
                 assert_eq!(
                     field.data_len,
                     size_of::<U>(),
-                    "field '{}' doesn't have enough data for a {}. ({:?})",
+                    "field '{}' doesn't have enough data for a {:?}. ({:?})",
                     name,
                     blender_type_name,
                     field,
@@ -598,7 +605,7 @@ impl<'a> Instance<'a> {
                 )
             }
             _ => panic!(
-                "field '{}' is not {}. ({:?})",
+                "field '{}' is not {:?}. ({:?})",
                 name, blender_type_name, field
             ),
         }
@@ -656,7 +663,7 @@ impl<'a> Instance<'a> {
                 assert_eq!(
                     field.data_len / len,
                     size_of::<U>(),
-                    "field '{}' doesn't have enough data for a {} array. ({:?})",
+                    "field '{}' doesn't have enough data for a {:?} array. ({:?})",
                     name,
                     blender_type_name,
                     field,
@@ -685,7 +692,7 @@ impl<'a> Instance<'a> {
                 }
             }
             _ => panic!(
-                "field '{}' is not a {} array. ({:?})",
+                "field '{}' is not a {:?} array. ({:?})",
                 name, blender_type_name, field
             ),
         };
@@ -1335,7 +1342,11 @@ fn generate_fields(
         let field_dna_type = &dna.types[field.type_index];
         let field_full_name = &dna.names[field.name_index];
 
-        let is_primitive = field.type_index < 12;
+        // primitive type indices are implicit, currently 12th type
+        // index is int8_t. The type index should not change over time
+        // but the number of primitive types might change, so it must
+        // be updated here.
+        let is_primitive = field.type_index < 13;
         let (_, (field_name, field_info)) =
             parse_field(field_full_name).expect("field name could not be parsed");
 

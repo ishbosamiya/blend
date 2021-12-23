@@ -6,15 +6,15 @@ use nom::number::complete::{
 
 pub(crate) trait BlendPrimitive {
     fn parse(data: &[u8], endianness: Endianness) -> Self;
-    fn blender_name() -> &'static str;
+    fn blender_name() -> &'static [&'static str];
 }
 
 impl BlendPrimitive for char {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_u8(data, endianness) as char
     }
-    fn blender_name() -> &'static str {
-        "char"
+    fn blender_name() -> &'static [&'static str] {
+        &["uchar"]
     }
 }
 
@@ -22,8 +22,8 @@ impl BlendPrimitive for i8 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_i8(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "char"
+    fn blender_name() -> &'static [&'static str] {
+        &["char", "int8_t"]
     }
 }
 
@@ -31,8 +31,8 @@ impl BlendPrimitive for u8 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_u8(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "char"
+    fn blender_name() -> &'static [&'static str] {
+        &["uchar"]
     }
 }
 
@@ -40,8 +40,8 @@ impl BlendPrimitive for u16 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_u16(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "ushort"
+    fn blender_name() -> &'static [&'static str] {
+        &["ushort"]
     }
 }
 
@@ -49,8 +49,8 @@ impl BlendPrimitive for i16 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_i16(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "short"
+    fn blender_name() -> &'static [&'static str] {
+        &["short"]
     }
 }
 
@@ -58,8 +58,8 @@ impl BlendPrimitive for i32 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_i32(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "int"
+    fn blender_name() -> &'static [&'static str] {
+        &["int"]
     }
 }
 
@@ -67,8 +67,8 @@ impl BlendPrimitive for f32 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_f32(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "float"
+    fn blender_name() -> &'static [&'static str] {
+        &["float"]
     }
 }
 
@@ -76,8 +76,8 @@ impl BlendPrimitive for f64 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_f64(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "double"
+    fn blender_name() -> &'static [&'static str] {
+        &["double"]
     }
 }
 
@@ -85,8 +85,8 @@ impl BlendPrimitive for u64 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_u64(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "uint64_t"
+    fn blender_name() -> &'static [&'static str] {
+        &["uint64_t"]
     }
 }
 
@@ -94,8 +94,8 @@ impl BlendPrimitive for i64 {
     fn parse(data: &[u8], endianness: Endianness) -> Self {
         parse_i64(data, endianness)
     }
-    fn blender_name() -> &'static str {
-        "int64_t"
+    fn blender_name() -> &'static [&'static str] {
+        &["int64_t"]
     }
 }
 
