@@ -300,12 +300,9 @@ impl BlendParseContext {
 
         let (input, (mut blocks, _)) = many_till(move |d| self.block(d), tag("ENDB"))(input)?;
 
-        let dna = if let Some(dna) = blocks.pop() {
+        let dna = if let Some(Block::Dna(dna)) = blocks.pop() {
             // Assumption: The DNA block is always the last one
-            match dna {
-                Block::Dna(dna) => dna,
-                _ => return Err(Err::Failure(BlendParseError::NoDnaBlockFound)),
-            }
+            dna
         } else {
             return Err(Err::Failure(BlendParseError::NoDnaBlockFound));
         };
