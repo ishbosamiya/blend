@@ -18,3 +18,4 @@ linked-hash-map = "0.5.2"
 
 [dev-dependencies]
 libflate = "0.1"
+zstd = "0.9"
